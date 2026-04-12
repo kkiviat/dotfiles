@@ -7,9 +7,6 @@ setopt HIST_IGNORE_DUPS          # Do not record an event that was just recorded
 setopt EXTENDED_HISTORY          # Write the history file in the ':start:elapsed;command' format.
 setopt HIST_EXPIRE_DUPS_FIRST    # Expire a duplicate event first when trimming history.
 
-bindkey "\e[A" history-beginning-search-backward
-bindkey "\e[B" history-beginning-search-forward
-
 autoload -Uz compinit && compinit
 zstyle ':completion:*' menu select
 zstyle ':completion:*' matcher-list 'm:{a-z}={A-Z}'
@@ -48,5 +45,28 @@ zstyle ':vcs_info:git:*' stagedstr ' +'     # shown when there are staged change
 setopt PROMPT_SUBST
 
 # Build the prompt
-PROMPT='%F{green}[%D{%H:%M:%S}]%f %F{cyan}%~%f%F{yellow}${vcs_info_msg_0_}%f
+PROMPT='%F{green}[%D{%H:%M:%S}]%f %F{magenta}%n%f@%F{yellow}%m%f %F{cyan}%~%f%F{yellow}${vcs_info_msg_0_}%f
 %F{magenta}❯%f '
+
+# Ensure the line editor is in the right mode
+autoload -Uz up-line-or-beginning-search
+autoload -Uz down-line-or-beginning-search
+zle -N up-line-or-beginning-search
+zle -N down-line-or-beginning-search
+
+# Bind to Arrow Keys (using terminfo for better compatibility)
+[[ -n "${terminfo[kcuu1]}" ]] && bindkey "${terminfo[kcuu1]}" up-line-or-beginning-search
+[[ -n "${terminfo[kcud1]}" ]] && bindkey "${terminfo[kcud1]}" down-line-or-beginning-search
+
+# Fallback for some terminals that don't communicate terminfo perfectly
+bindkey "\e[A" up-line-or-beginning-search
+bindkey "\e[B" down-line-or-beginning-search
+
+claude-sandbox() {
+  docker run -it --rm \
+      -v "$(pwd):/workspace" \
+      -v claude-config:/home/dev/.claude \
+      -v "$HOME/.claude.json:/home/dev/.claude.json" \
+      -w /workspace \
+      my-claude zsh
+}
