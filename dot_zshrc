@@ -25,7 +25,7 @@ export EDITOR="nvim"
 export VISUAl="$EDITOR"
 set -o emacs
 
-export PATH="$PATH:/opt/nvim-linux-x86_64/bin"
+export PATH="$PATH:/opt/nvim-linux-x86_64/bin:$HOME/.local/bin"
 
 # Load the built-in vcs_info module
 autoload -Uz vcs_info
@@ -45,7 +45,7 @@ zstyle ':vcs_info:git:*' stagedstr ' +'     # shown when there are staged change
 setopt PROMPT_SUBST
 
 # Build the prompt
-PROMPT='%F{green}[%D{%H:%M:%S}]%f %F{magenta}%n%f@%F{yellow}%m%f %F{cyan}%~%f%F{yellow}${vcs_info_msg_0_}%f
+PROMPT='%F{green}[%D{%H:%M:%S}]%f %F{pink}%n%f@%F{yellow}%m%f %F{cyan}%~%f%F{yellow}${vcs_info_msg_0_}%f
 %F{magenta}❯%f '
 
 # Ensure the line editor is in the right mode
@@ -62,11 +62,20 @@ zle -N down-line-or-beginning-search
 bindkey "\e[A" up-line-or-beginning-search
 bindkey "\e[B" down-line-or-beginning-search
 
+# bind home and end keys
+bindkey "^[[H" beginning-of-line
+bindkey "^[[F" end-of-line
+
+# fzf
+export FZF_DEFAULT_COMMAND='rg --files --hidden --smart-case'
+
 claude-sandbox() {
   docker run -it --rm \
       -v "$(pwd):/workspace" \
       -v claude-config:/home/dev/.claude \
       -v "$HOME/.claude.json:/home/dev/.claude.json" \
       -w /workspace \
+      -p 8000:8000 \
+      -p 61537:61537 \
       my-claude zsh
 }
